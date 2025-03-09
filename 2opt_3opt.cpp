@@ -1,7 +1,10 @@
 #include <bits/stdc++.h>
 #include <chrono>
 #include <fstream>  
+#include <filesystem>
 using namespace std;
+namespace fs = std::filesystem;
+
 
 // Функция вычисления евклидовой дистанции между двумя точками
 inline double distEuclid(const pair<double,double> &a, const pair<double,double> &b){
@@ -192,16 +195,26 @@ int main(int argc, char* argv[]){
 
     // Сохранение итогового маршрута в отдельный файл.
     // Если передан второй параметр, используем его как имя файла, иначе "route.txt".
-    string routeFilename = (argc > 2) ? argv[2] : "route.txt";
+    // Перед сохранением маршрута создаем папку result_2opt_3opt, если её нет.
+    if (!fs::exists("result_2opt_3opt")) {
+        if (!fs::create_directory("result_2opt_3opt")) {
+            cerr << "Ошибка при создании директории result_2opt_3opt." << endl;
+            return 1;
+        }
+    }
+
+    // Если передан второй параметр, используем его как имя файла, иначе "route.txt"
+    // При этом путь дополняется префиксом "result_2opt_3opt/"
+    string routeFilename = (argc > 2) ? string("result_2opt_3opt/") + argv[2] : "result_2opt_3opt/route.txt";
     ofstream routeFile(routeFilename);
     if(routeFile.is_open()){
         for(int i = 0; i < N; i++){
-            // Выводим вершины с 1 (можно изменить, если нужна индексация с 0)
+            // Выводим вершины (с индексами, начиная с 1)
             routeFile << route[i] + 1 << (i + 1 < N ? ' ' : '\n');
         }
         routeFile.close();
     } else {
-        cerr << "Ошибка при открытии файла для записи маршрута." << endl;
+        cerr << "Ошибка при открытии файла для записи маршрута: " << routeFilename << endl;
     }
 
     return 0;
